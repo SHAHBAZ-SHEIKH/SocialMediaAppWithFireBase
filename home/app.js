@@ -40,7 +40,12 @@ onAuthStateChanged(auth, async (user) => {
             userDetails = docSnap.data()
             userDetails.uid = uid
             console.log(userDetails, "userDetails")
-            const { userName } = docSnap.data()
+            const { userName, imgUrl } = docSnap.data()
+
+            document.querySelector("#homeProfile").src = imgUrl || "../assests/feed4.jpg"
+            document.querySelector("#HomeLeftProfile").src = imgUrl || "../assests/feed4.jpg"
+            document.querySelector("#homeLeftname").innerHTML = userName || "Shahbaz"
+
         } else {
 
             console.log("No such document!");
@@ -78,7 +83,7 @@ let postCreate = () => {
 
     let imageUrl = feedPicupload.files[0]
 
-    const date = new Date()
+    let date = new Date()
 
 
     const storageRef = ref(storage, `images/${date.getTime()}`);
@@ -112,7 +117,7 @@ let postCreate = () => {
                 downloadImageUrl = downloadURL
                 try {
                     // Add a new document with a generated id.
-                    const docRef = await addDoc(collection(db, "users"), {
+                    const docRef = await addDoc(collection(db, "posts"), {
                         textData: postValue.value,
                         imgData: downloadImageUrl,
                         authorDetails: {
@@ -120,9 +125,10 @@ let postCreate = () => {
                             img: userDetails.imgUrl || "",
                             uid: userDetails.uid,
                         },
+                        timestamp: new Date()
                     });
                     console.log("Document written with ID: ", docRef.id);
-                    
+
                     fetchData()
                     // postFetchFunction();
                 } catch (error) {
@@ -132,31 +138,64 @@ let postCreate = () => {
         }
     );
 
-    
 
-    
+
+
 }
+
 
 
 const postCreateBtn = document.querySelector("#postCreateBtn")
 
 postCreateBtn.addEventListener("click", postCreate)
 
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 3600;
+
+    if (interval < 1) {
+        interval = seconds / 60;
+        if (interval < 1) {
+            return "just now";
+        } else if (interval < 2) {
+            return "1 minute ago";
+        } else {
+            return Math.floor(interval) + " minutes ago";
+        }
+    } else if (interval < 24) {
+        if (interval < 2) {
+            return "1 hour ago";
+        } else {
+            return Math.floor(interval) + " hours ago";
+        }
+    } else {
+        interval = interval / 24;
+        if (interval < 2) {
+            return "1 day ago";
+        } else {
+            return Math.floor(interval) + " days ago";
+        }
+    }
+}
+
 
 const showpostFunction = (postData) => {
     const postUsers = document.querySelector(".postUsers")
+    const postTime = postData.timestamp.toDate();  
+    const timeAgoText = timeAgo(postTime);
+
 
     postUsers.innerHTML += `<div class="postArea">
                             <div class="usertop">
                                 <div class="userPost">
                                     <div class="profile-picture" id="my-profile-picture">
                                         
-                                        <img src="../assests/feed4.jpg" alt="">
+                                        <img src= "../assests/feed4.jpg" alt="">
                 
                                     </div>
                                     <div class="info">
                                         <span>${postData.authorDetails.name}</span>
-                                        <small>Pakistan, <span>1 Hour Ago</span></small>
+                                        <small>Pakistan, <span>${timeAgoText}</span></small>
 
                                     </div>
                                 </div>
@@ -196,7 +235,7 @@ const showpostFunction = (postData) => {
                                 </div>
     
                                 <div class="Comment">
-                                    <p><b>John Williams</b> and <b>77 comments other</b></p>
+                                    <p><b>Umer Abbas</b> and <b>77 comments other</b></p>
                                 </div>
                             </div>
 
@@ -209,20 +248,20 @@ const showpostFunction = (postData) => {
 let fetchData = async () => {
     const postUsers = document.querySelector(".postUsers")
     postUsers.innerHTML = ""
-    const q = query(collection(db, "users"));
+    const q = query(collection(db, "posts"));
 
     try {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
 
-        console.log(doc.id, " => ", doc.data());
-        showpostFunction(doc.data())
+            console.log(doc.id, " => ", doc.data());
+            showpostFunction(doc.data())
 
-    });
-    
+        });
+
     } catch (error) {
-        console.log("error aa raha hai",error)
-        
+        console.log("error aa raha hai", error)
+
     }
 }
 
@@ -266,3 +305,4 @@ let swiper = new Swiper(".mySwiper", {
     slidesPerView: 4,
     spaceBetween: 4,
 });
+

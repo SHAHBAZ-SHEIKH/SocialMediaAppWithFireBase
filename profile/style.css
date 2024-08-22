@@ -182,15 +182,19 @@ main{
 }
 
 
-.profielPicture{
-    width: 200px;
+#myprofilepicture{
+    width: 200px !important;
+    border-radius: 50% !important;
+    height: 200px !important;
+    overflow: hidden !important; 
+     border: 5px solid var(--color-light); 
+}
+#myprofilepicture img{
+    width: 100% !important;
     border-radius: 50%;
-    overflow: hidden;
-    border: 5px solid var(--color-light); 
-    background-color: var(--color-white);
-    
-   
-    
+    height: 200px !important;
+    object-fit: cover;
+
 }
 
 .userFriend{
@@ -205,11 +209,11 @@ main{
     width: 50px;
 }
 
-.profielPicture img{
+/* .profielPicture img{
     width: 100%;
     object-fit: cover;
 
-}
+} */
 
 .ediMenu{
     display: flex;
