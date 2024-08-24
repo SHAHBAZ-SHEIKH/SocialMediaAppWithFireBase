@@ -77,6 +77,13 @@ body{
     
 }
 
+.mysearch{
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    align-items: center;
+}
+
 nav .searchBar{
     padding: 5px 10px;
     background:hsl(252,30%,90%);
@@ -783,4 +790,21 @@ main{
 } */
 
 
+#editBtn{
+    cursor: pointer;
+}
+#deletedBtn{
+    cursor: pointer;
+}
 
+
+#saveEditBtn{
+    padding: var(--btn-padding);
+    background-color: var(--color-primary);
+    color: var(--color-light);
+    border-radius: var(--border-radius);
+    border: none !important;
+    outline: none !important;
+    margin-top: 10px;
+    display: none;
+}

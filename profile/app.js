@@ -38,14 +38,8 @@ onAuthStateChanged(auth, async (user) => {
             console.log(userDetails, "userDetails")
              const { userName ,imgUrl,education,designation,address,hobbies } = docSnap.data()
 
-            //  userDetails.userName = userDetails.userName || "Anonymous"
-            //  userDetails.imgUrl = userDetails.imgUrl || "../assests/feed4.jpg"
-            //  userDetails.education = userDetails.education || "Matriculation"
-            //  userDetails.designation = userDetails.designation 
-            //  userDetails.address = userDetails.address 
-            //  userDetails.hobbies = userDetails.hobbies 
             
-            document.querySelector("#userName").innerHTML =userName || "Anonymous"
+            document.querySelector("#userName").innerHTML =userName.slice(0,1).toUpperCase()+userName.slice(1) || "Anonymous"
             document.querySelector("#userProfile").src = imgUrl || "../assests/feed4.jpg"
             document.querySelector("#userEducation").innerHTML = education || "Matriculation"
             document.querySelector("#userDesignation").innerHTML = designation || "Student"
@@ -106,6 +100,8 @@ const showpostFunction = (postData) => {
     const postUsers = document.querySelector(".postUsers")
     const postTime = postData.timestamp.toDate();  
     const timeAgoText = timeAgo(postTime);
+    let postUsername = postData.authorDetails.name.slice(0,1).toUpperCase()+postData.authorDetails.name.slice(1) 
+    let userPostTopImage = postData.authorDetails.img || "../assests/feed4.jpg"
 
      console.log(postData)
 
@@ -114,11 +110,11 @@ const showpostFunction = (postData) => {
                                 <div class="userPost">
                                     <div class="profile-picture" id="my-profile-picture">
                                         
-                                        <img src="../assests/feed4.jpg" alt="">
+                                        <img src="${userPostTopImage}" alt="">
                 
                                     </div>
                                     <div class="info">
-                                        <span>${postData.authorDetails.name}</span>
+                                        <b><span>${postUsername}</span></b>
                                         <small>Pakistan, <span>${timeAgoText}</span></small>
 
                                     </div>
@@ -266,6 +262,7 @@ let updateData = async() => {
                         document.querySelector("#userAddress").innerHTML = address;
                         document.querySelector("#userHobbies").innerHTML = hobbies;
                         document.querySelector("#userInputPic").src = imgUrl
+                        
                         
                     } else {
                         // docSnap.data() will be undefined in this case

@@ -15,7 +15,9 @@
   addDoc,
   getDoc,
   query,
-  getDocs
+  getDocs,
+  deleteDoc ,
+  updateDoc
   
    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
    import { 
@@ -63,5 +65,7 @@ export{
     getDownloadURL,
     ref,
     query,
-    getDocs
+    getDocs,
+    deleteDoc ,
+    updateDoc
 }

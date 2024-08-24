@@ -13,7 +13,9 @@ import {
     addDoc,
     collection,
     query,
-    getDocs
+    getDocs,
+    deleteDoc,
+    updateDoc
 
 
 } from "../firebase.js";
@@ -44,7 +46,7 @@ onAuthStateChanged(auth, async (user) => {
 
             document.querySelector("#homeProfile").src = imgUrl || "../assests/feed4.jpg"
             document.querySelector("#HomeLeftProfile").src = imgUrl || "../assests/feed4.jpg"
-            document.querySelector("#homeLeftname").innerHTML = userName || "Shahbaz"
+            document.querySelector("#homeLeftname").innerHTML = userName.slice(0,1).toUpperCase()+userName.slice(1) || "Shahbaz"
 
         } else {
 
@@ -64,9 +66,18 @@ const logOutBtn = document.getElementById("logOutBtn")
 
 logOutBtn.addEventListener("click", () => {
     signOut(auth).then(() => {
-        alert("Logout Successfully ")
+        Swal.fire({
+            title: `LogOut Successfully`,
+            text: "Best of Luck",
+            icon: "success"
+        });
     }).catch((error) => {
-        console.log("Not Log out error aa raha hai")
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${error.message}`,
+            
+          });
     });
 
 })
@@ -130,6 +141,10 @@ let postCreate = () => {
                     console.log("Document written with ID: ", docRef.id);
 
                     fetchData()
+                    hidePopup()
+                    postValue.value = ""
+                    
+
                     // postFetchFunction();
                 } catch (error) {
                     console.log(error, "==>> error bata raha hun");
@@ -179,10 +194,12 @@ function timeAgo(date) {
 }
 
 
-const showpostFunction = (postData) => {
+const showpostFunction = (postData,postId) => {
     const postUsers = document.querySelector(".postUsers")
     const postTime = postData.timestamp.toDate();  
     const timeAgoText = timeAgo(postTime);
+    let postUsername = postData.authorDetails.name.slice(0,1).toUpperCase()+postData.authorDetails.name.slice(1) 
+    let userPostTopImage = postData.authorDetails.img || "../assests/feed4.jpg"
 
 
     postUsers.innerHTML += `<div class="postArea">
@@ -190,11 +207,11 @@ const showpostFunction = (postData) => {
                                 <div class="userPost">
                                     <div class="profile-picture" id="my-profile-picture">
                                         
-                                        <img src= "../assests/feed4.jpg" alt="">
+                                        <img src= "${userPostTopImage}" alt="">
                 
                                     </div>
                                     <div class="info">
-                                        <span>${postData.authorDetails.name}</span>
+                                        <b><span>${postUsername}</span></b>
                                         <small>Pakistan, <span>${timeAgoText}</span></small>
 
                                     </div>
@@ -203,8 +220,8 @@ const showpostFunction = (postData) => {
                                 <span class="edit">
                                     <img src="../assests/three-dots.svg" alt="">
                                     <ul class="edit-menu ">
-                                        <li><i class="fa fa-pen"></i>Edit</li>
-                                        <li><i class="fa fa-trash"></i>Delete</li>
+                                        <li id="editBtn" onclick="editHandler('${postId}', '${postData.authorDetails.uid}', '${postData.textData}', '${postData.imgData}')"><i  class="fa fa-pen"></i>Edit</li>
+                                        <li id="deletedBtn" onclick="deleteHandler('${postId}','${postData.authorDetails.uid}')"><i  class="fa fa-trash"></i>Delete</li>
                                     </ul>
                                 </span>
 
@@ -235,7 +252,7 @@ const showpostFunction = (postData) => {
                                 </div>
     
                                 <div class="Comment">
-                                    <p><b>Umer Abbas</b> and <b>77 comments other</b></p>
+                                    <p><b>Umer Abbas</b> and <b>77 other comments</b></p>
                                 </div>
                             </div>
 
@@ -255,7 +272,7 @@ let fetchData = async () => {
         querySnapshot.forEach((doc) => {
 
             console.log(doc.id, " => ", doc.data());
-            showpostFunction(doc.data())
+            showpostFunction(doc.data(),doc.id)
 
         });
 
@@ -266,6 +283,79 @@ let fetchData = async () => {
 }
 
 fetchData()
+
+
+let deleteHandler = async (postId, postAuthorUid) => {
+    console.log(postId,postAuthorUid,userDetails.uid)
+    if (userDetails.uid === postAuthorUid) {
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            console.log("Post deleted successfully");
+            fetchData(); 
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Unauthorized",
+            text: "You can only delete your own posts!",
+        });
+    }
+};
+
+window.deleteHandler = deleteHandler
+
+let editHandler = async (postId, postAuthorUid, currentText, currentImage) => {
+    if (userDetails.uid === postAuthorUid) {
+        document.querySelector("#postValue").value = currentText;
+        document.querySelector("#myImage").src = currentImage;
+        showPopup(); 
+
+        document.querySelector("#postCreateBtn").removeEventListener("click", postCreate);
+        postCreateBtn.style.display = "none"
+
+        const saveEditBtn = document.querySelector("#saveEditBtn");
+
+        saveEditBtn.style.display = 'block';
+        saveEditBtn.addEventListener("click", async () => {
+            const newText = document.querySelector("#postValue").value;
+            const newImage = document.querySelector("#feedPicupload").files[0];
+
+            let downloadImageUrl = currentImage;
+
+            if (newImage) {
+                const storageRef = ref(storage, `images/${Date.now()}`);
+                const uploadTask = uploadBytesResumable(storageRef, newImage);
+                await uploadTask.then(async (snapshot) => {
+                    downloadImageUrl = await getDownloadURL(snapshot.ref);
+                });
+            }
+
+            try {
+                await updateDoc(doc(db, "posts", postId), {
+                    textData: newText,
+                    imgData: downloadImageUrl
+                });
+                console.log("Post updated successfully");
+                hidePopup(); 
+                fetchData(); 
+                postCreateBtn.style.display="block"
+            } catch (error) {
+                console.error("Error updating post:", error);
+            }
+        });
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Unauthorized",
+            text: "You can only edit your own posts!",
+        });
+    }
+};
+
+window.editHandler = editHandler;
+     
 
 
 
