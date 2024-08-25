@@ -36,10 +36,10 @@ onAuthStateChanged(auth, async (user) => {
             userDetails = docSnap.data()
             userDetails.uid = uid
             console.log(userDetails, "userDetails")
-             const { userName ,imgUrl,education,designation,address,hobbies } = docSnap.data()
+            const { userName, imgUrl, education, designation, address, hobbies } = docSnap.data()
 
-            
-            document.querySelector("#userName").innerHTML =userName.slice(0,1).toUpperCase()+userName.slice(1) || "Anonymous"
+
+            document.querySelector("#userName").innerHTML = userName.slice(0, 1).toUpperCase() + userName.slice(1) || "Anonymous"
             document.querySelector("#userProfile").src = imgUrl || "../assests/feed4.jpg"
             document.querySelector("#userEducation").innerHTML = education || "Matriculation"
             document.querySelector("#userDesignation").innerHTML = designation || "Student"
@@ -98,12 +98,12 @@ function timeAgo(date) {
 
 const showpostFunction = (postData) => {
     const postUsers = document.querySelector(".postUsers")
-    const postTime = postData.timestamp.toDate();  
+    const postTime = postData.timestamp.toDate();
     const timeAgoText = timeAgo(postTime);
-    let postUsername = postData.authorDetails.name.slice(0,1).toUpperCase()+postData.authorDetails.name.slice(1) 
+    let postUsername = postData.authorDetails.name.slice(0, 1).toUpperCase() + postData.authorDetails.name.slice(1)
     let userPostTopImage = postData.authorDetails.img || "../assests/feed4.jpg"
 
-     console.log(postData)
+    console.log(postData)
 
     postUsers.innerHTML += `<div class="postArea">
                             <div class="usertop">
@@ -176,7 +176,7 @@ let hobbiesInput = document.querySelector("#hobbiesInput")
 let profilePictureInput = document.querySelector("#profilePictureInput")
 
 
-let updateData = async() => {
+let updateData = async () => {
 
     console.log(profilePictureInput.files[0]);
 
@@ -222,7 +222,7 @@ let updateData = async() => {
                     hobbiesInput.value
                 );
                 try {
-                    
+
                     const response = await setDoc(doc(db, "users", userUID), {
 
                         education: educationInput.value,
@@ -232,13 +232,13 @@ let updateData = async() => {
                         hobbies: hobbiesInput.value,
                         imgUrl: downloadURL,
                         userName: userDetails.userName,
-                    
+
 
                     });
                     console.log(response, "==>> response");
                     document.querySelector("#closeBtn").click();
 
-                    
+
 
                     const docRef = doc(db, "users", userUID);
                     const docSnap = await getDoc(docRef);
@@ -255,15 +255,15 @@ let updateData = async() => {
                             userName
                         } = docSnap.data();
 
-                        
+
                         document.querySelector("#userProfile").src = imgUrl;
                         document.querySelector("#userEducation").innerHTML = education;
                         document.querySelector("#userDesignation").innerHTML = designation;
                         document.querySelector("#userAddress").innerHTML = address;
                         document.querySelector("#userHobbies").innerHTML = hobbies;
                         document.querySelector("#userInputPic").src = imgUrl
-                        
-                        
+
+
                     } else {
                         // docSnap.data() will be undefined in this case
                         console.log("No such document!");
@@ -286,6 +286,22 @@ updateProfileBtn.addEventListener("click", updateData)
 
 
 
+async function getUserUpdatedData(uid) {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        // console.log("Document data:", docSnap.data());
+        return docSnap.data();
+    } else {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+    }
+}
+
+
+
+
 
 
 let fetchData = async () => {
@@ -295,15 +311,28 @@ let fetchData = async () => {
 
     try {
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(async (doc) => {
 
             console.log(doc.id, " => ", doc.data());
             // showpostFunction(doc.data())
 
-            const { authorDetails } = doc.data()
-            //console.log(authorDetails)
+            const { authorDetails: { uid }, } = doc.data()
+            console.log(uid)
 
-            if (authorDetails.uid === userUID) showpostFunction(doc.data())
+            const userUpdateData = await getUserUpdatedData(uid)
+            console.log(userUpdateData)
+            const { authorDetails, imgData, textData, timestamp } = doc.data()
+            authorDetails.img = userUpdateData.imgUrl
+            authorDetails.name = userUpdateData.userName
+
+            const postData = {
+                authorDetails,
+                imgData,
+                textData,
+                timestamp
+            }
+
+            if (authorDetails.uid === userUID) showpostFunction(postData)
 
 
 

@@ -46,7 +46,7 @@ onAuthStateChanged(auth, async (user) => {
 
             document.querySelector("#homeProfile").src = imgUrl || "../assests/feed4.jpg"
             document.querySelector("#HomeLeftProfile").src = imgUrl || "../assests/feed4.jpg"
-            document.querySelector("#homeLeftname").innerHTML = userName.slice(0,1).toUpperCase()+userName.slice(1) || "Shahbaz"
+            document.querySelector("#homeLeftname").innerHTML = userName.slice(0, 1).toUpperCase() + userName.slice(1) || "Shahbaz"
 
         } else {
 
@@ -76,8 +76,8 @@ logOutBtn.addEventListener("click", () => {
             icon: "error",
             title: "Oops...",
             text: `${error.message}`,
-            
-          });
+
+        });
     });
 
 })
@@ -143,7 +143,7 @@ let postCreate = () => {
                     fetchData()
                     hidePopup()
                     postValue.value = ""
-                    
+
 
                     // postFetchFunction();
                 } catch (error) {
@@ -194,11 +194,11 @@ function timeAgo(date) {
 }
 
 
-const showpostFunction = (postData,postId) => {
+const showpostFunction = (postData, postId) => {
     const postUsers = document.querySelector(".postUsers")
-    const postTime = postData.timestamp.toDate();  
+    const postTime = postData.timestamp.toDate();
     const timeAgoText = timeAgo(postTime);
-    let postUsername = postData.authorDetails.name.slice(0,1).toUpperCase()+postData.authorDetails.name.slice(1) 
+    let postUsername = postData.authorDetails.name.slice(0, 1).toUpperCase() + postData.authorDetails.name.slice(1)
     let userPostTopImage = postData.authorDetails.img || "../assests/feed4.jpg"
 
 
@@ -261,6 +261,20 @@ const showpostFunction = (postData,postId) => {
 
 
 
+async function getUserUpdatedData(uid) {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        // console.log("Document data:", docSnap.data());
+        return docSnap.data();
+    } else {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+    }
+}
+
+
 
 let fetchData = async () => {
     const postUsers = document.querySelector(".postUsers")
@@ -269,10 +283,26 @@ let fetchData = async () => {
 
     try {
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(async(doc) => {
 
             console.log(doc.id, " => ", doc.data());
-            showpostFunction(doc.data(),doc.id)
+
+            const { authorDetails: { uid }, } = doc.data()
+            console.log(uid)
+
+            const userUpdateData = await getUserUpdatedData(uid)
+            console.log(userUpdateData)
+            const {authorDetails,imgData,textData,timestamp} = doc.data()
+            authorDetails.img = userUpdateData.imgUrl
+            authorDetails.name = userUpdateData.userName
+
+            const postData = {
+                authorDetails,
+                imgData,
+                textData,
+                timestamp
+            }
+            showpostFunction(postData, doc.id)
 
         });
 
@@ -286,12 +316,12 @@ fetchData()
 
 
 let deleteHandler = async (postId, postAuthorUid) => {
-    console.log(postId,postAuthorUid,userDetails.uid)
+    console.log(postId, postAuthorUid, userDetails.uid)
     if (userDetails.uid === postAuthorUid) {
         try {
             await deleteDoc(doc(db, "posts", postId));
             console.log("Post deleted successfully");
-            fetchData(); 
+            fetchData();
         } catch (error) {
             console.error("Error deleting post:", error);
         }
@@ -310,7 +340,7 @@ let editHandler = async (postId, postAuthorUid, currentText, currentImage) => {
     if (userDetails.uid === postAuthorUid) {
         document.querySelector("#postValue").value = currentText;
         document.querySelector("#myImage").src = currentImage;
-        showPopup(); 
+        showPopup();
 
         document.querySelector("#postCreateBtn").removeEventListener("click", postCreate);
         postCreateBtn.style.display = "none"
@@ -338,9 +368,9 @@ let editHandler = async (postId, postAuthorUid, currentText, currentImage) => {
                     imgData: downloadImageUrl
                 });
                 console.log("Post updated successfully");
-                hidePopup(); 
-                fetchData(); 
-                postCreateBtn.style.display="block"
+                hidePopup();
+                fetchData();
+                postCreateBtn.style.display = "block"
             } catch (error) {
                 console.error("Error updating post:", error);
             }
@@ -355,7 +385,7 @@ let editHandler = async (postId, postAuthorUid, currentText, currentImage) => {
 };
 
 window.editHandler = editHandler;
-     
+
 
 
 

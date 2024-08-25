@@ -808,3 +808,47 @@ main{
     margin-top: 10px;
     display: none;
 }
+
+
+@media(max-width:1200px){
+    .container{
+        width: 96%;
+    }
+    .main-container{
+        grid-template-columns: auto 26vw;
+    }
+    .main-left{
+        display: none;
+    }
+
+    aside h3{
+        display: none;
+    }
+
+    aside .menu-item span img{
+        margin-left: 1.4rem;
+    }
+
+    aside .btn{
+        display: none;
+    }
+    @media(max-width:991px){
+        nav .search-bar{
+            display: none;
+        }
+
+        .main-container{
+            grid-template-columns: auto 0;
+        }
+        .main-right{
+            display: none;
+        }
+
+        .main-left{
+            left: 0;
+            
+        }
+
+    }
+
+}

@@ -545,3 +545,94 @@ main Left */
     font-size: 16px;
     font-weight: 500;
 }
+
+
+
+
+.main-container {
+    display: grid;
+    grid-template-columns: 18vw auto 20vw;
+    position: relative;
+}
+
+
+@media (max-width: 768px) {
+    .main-container {
+        grid-template-columns: 1fr; 
+    }
+
+    .mainLeft {
+        display: none; 
+    }
+
+    .mainRight {
+        max-width: 100%; 
+        width: 100%;
+    }
+
+    .mainSection {
+        grid-template-columns: 1fr; 
+    }
+
+    .userPostSection {
+        justify-content: center; 
+    }
+}
+
+
+
+
+
+
+@media (max-width: 768px) {
+    .topSection {
+        text-align: center;
+    }
+    #myprofilepicture {
+        width: 150px;
+        height: 150px;
+        margin-top: -50px;
+        
+    }
+    .ediMenu{
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+
+
+
+@media (max-width: 576px) {
+    .topSection {
+        text-align: center;
+    }
+    #myprofilepicture {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+    }
+}
+@media (max-width: 576px) {
+    .backGroundImage img,
+    .postArea .postImg img {
+        width: 100%;
+        height: auto;
+    }
+}
+
+
+
+
+@media (max-width: 576px) {
+    .mysearch a {
+        font-size: 24px;
+    }
+    #logOutBtn,
+    #addStory,
+    #editProfile {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+}
